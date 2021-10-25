@@ -1,6 +1,3 @@
-import hashlib
-import io
-
 from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import FrozenSet
@@ -11,6 +8,8 @@ from typing import Union
 from poetry.core.packages.utils.utils import path_to_url
 
 from .dependency import Dependency
+from .file_hash import FileHash
+from .file_hash import HashValue
 
 
 if TYPE_CHECKING:
@@ -30,6 +29,7 @@ class FileDependency(Dependency):
         self._path = path
         self._base = base or Path.cwd()
         self._full_path = path
+        self._file_hash = FileHash(path)
 
         if not self._path.is_absolute():
             try:
@@ -69,13 +69,8 @@ class FileDependency(Dependency):
     def is_file(self) -> bool:
         return True
 
-    def hash(self, hash_name: str = "sha256") -> str:
-        h = hashlib.new(hash_name)
-        with self._full_path.open("rb") as fp:
-            for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b""):
-                h.update(content)
-
-        return h.hexdigest()
+    def hash(self, hash_name: str = "sha256") -> HashValue:
+        return self._file_hash.other(hash_name)
 
     def with_constraint(self, constraint: "BaseConstraint") -> "FileDependency":
         new = FileDependency(

@@ -24,8 +24,11 @@ def test_file_dependency_dir():
 def test_default_hash():
     path = DIST_PATH / TEST_FILE
     dep = FileDependency("demo", path)
-    SHA_256 = "72e8531e49038c5f9c4a837b088bfcb8011f4a9f76335c8f0654df6ac539b3d6"
-    assert dep.hash() == SHA_256
+    sha_256_digest = "72e8531e49038c5f9c4a837b088bfcb8011f4a9f76335c8f0654df6ac539b3d6"
+    sha_256_algo = "sha256"
+    actual = dep.hash()
+    assert actual.digest == sha_256_digest
+    assert actual.algorithm == sha_256_algo
 
 
 try:
@@ -81,7 +84,7 @@ except ImportError:
 def test_guaranteed_hash(hash_name, expected):
     path = DIST_PATH / TEST_FILE
     dep = FileDependency("demo", path)
-    assert dep.hash(hash_name) == expected
+    assert dep.hash(hash_name).digest == expected
 
 
 def _test_file_dependency_pep_508(
