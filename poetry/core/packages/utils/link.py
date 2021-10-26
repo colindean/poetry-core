@@ -6,6 +6,7 @@ from typing import Any
 from typing import Optional
 from typing import Tuple
 
+from ..file_hash import HashValue
 from .utils import path_to_url
 from .utils import splitext
 
@@ -137,12 +138,20 @@ class Link:
     _hash_re = re.compile(r"(sha1|sha224|sha384|sha256|sha512|md5)=([a-f0-9]+)")
 
     @property
-    def hash(self) -> Optional[str]:
+    def hash(self) -> Optional[HashValue]:
+        if self.hash_name and self.hash_digest:
+            return HashValue(self.hash_name, self.hash_digest)
+        return None
+
+    # FIXME: remove this in favor of hash() by itself
+    @property
+    def hash_digest(self) -> Optional[str]:
         match = self._hash_re.search(self.url)
         if match:
             return match.group(2)
         return None
 
+    # FIXME: remove this in favor of hash() by itself
     @property
     def hash_name(self) -> Optional[str]:
         match = self._hash_re.search(self.url)
